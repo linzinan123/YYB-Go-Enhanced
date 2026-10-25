@@ -192,7 +192,8 @@ func Open(path string) (*DB, error) {
 			return nil, err
 		}
 	}
-	db, err := sql.Open("sqlite", path)
+	// 这里修改，追加参数关闭WAL
+	db, err := sql.Open("sqlite", path + "?_journal_mode=DELETE&_locking_mode=EXCLUSIVE")
 	if err != nil {
 		return nil, err
 	}
