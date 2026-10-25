@@ -192,8 +192,7 @@ func Open(path string) (*DB, error) {
 			return nil, err
 		}
 	}
-	// 这里修改，追加参数关闭WAL
-	db, err := sql.Open("sqlite", path + "?_journal_mode=DELETE&_locking_mode=EXCLUSIVE")
+	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +205,8 @@ func Open(path string) (*DB, error) {
 		return nil, err
 	}
 	if path != ":memory:" {
-		_, _ = db.ExecContext(ctx, "PRAGMA journal_mode=WAL")
+		// 关闭WAL，使用DELETE回滚模式，适配iStoreOS/OpenWrt overlayfs
+		_, _ = db.ExecContext(ctx, "PRAGMA journal_mode=DELETE;")
 	}
 	_, _ = db.ExecContext(ctx, "PRAGMA synchronous=NORMAL")
 	_, _ = db.ExecContext(ctx, "PRAGMA foreign_keys=ON")
